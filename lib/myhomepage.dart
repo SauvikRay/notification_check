@@ -1,24 +1,19 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:check_notification/demo_screen.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'notificationservice/notification-service.dart';
 
+DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
     super.key,
   });
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -28,9 +23,31 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String deviceTokenToSendPushNotification = '';
 
+
+   //Device Info plugin 
+   deviceInfo()async{
+    try{
+          
+      if(Platform.isAndroid){
+        AndroidDeviceInfo androidDeviceInfo = await deviceInfoPlugin.androidInfo;
+        log("Details of an android: ${androidDeviceInfo.version.release}\n ${androidDeviceInfo.version.sdkInt} ");
+        String details =androidDeviceInfo.version.sdkInt.toString();
+        return details;
+      }else{
+        IosDeviceInfo iosDeviceInfo = await deviceInfoPlugin.iosInfo;
+        log("Details of an android: ${iosDeviceInfo.systemVersion}\n ${iosDeviceInfo.systemVersion} ");
+        String details =iosDeviceInfo.systemVersion.toString();
+        return details;
+      }
+    }catch(e){
+      log(e.toString());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    deviceInfo();
 
     // 1. This method call when app in terminated state and you get a notification
     // when you click on notification app open from terminated state and you can get notification data in this method
