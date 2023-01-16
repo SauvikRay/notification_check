@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:check_notification/demo_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 
 import 'notificationservice/notification-service.dart';
@@ -47,65 +47,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    deviceInfo();
+    // deviceInfo();
 
-    // 1. This method call when app in terminated state and you get a notification
-    // when you click on notification app open from terminated state and you can get notification data in this method
-
-    FirebaseMessaging.instance.getInitialMessage().then(
-      (message) {
-        log("FirebaseMessaging.instance.getInitialMessage");
-        if (message != null) {
-          log("New Notification");
-          if (message.data['_id'] != null) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DemoScreen(
-                  id: message.data['id'],
-                ),
-              ),
-            );
-          }
-        }
-      },
-    );
-
-    // 2. This method only call when App in forground it mean app must be opened
-    FirebaseMessaging.onMessage.listen(
-      (message) {
-        log("FirebaseMessaging.onMessage.listen");
-        if (message.notification != null) {
-          log(message.notification!.title.toString());
-          log(message.notification!.body.toString());
-          log("message.data11 ${message.data}");
-          LocalNotificationService.createanddisplaynotification(message);
-        }
-      },
-    );
-
-    // 3. This method only call when App in background and not terminated(not closed)
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) {
-        log("FirebaseMessaging.onMessageOpenedApp.listen");
-        if (message.notification != null) {
-          log(message.notification!.title.toString());
-          log(message.notification!.body.toString());
-          log("message.data22 ${message.data['id']}");
-        }
-      },
-    );
+   
   }
 
-  Future<void> getDeviceTokenToSendNotification() async {
-    final FirebaseMessaging fcm = FirebaseMessaging.instance;
-    final token = await fcm.getToken();
-    deviceTokenToSendPushNotification = token.toString();
-    log("Device Token Value: $deviceTokenToSendPushNotification");
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    getDeviceTokenToSendNotification();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Check Notification'),
