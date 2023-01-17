@@ -5,8 +5,11 @@ import 'package:check_notification/demo_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'main.dart';
 import 'notificationservice/notification-service.dart';
+import 'notificationservice/update_notification_service.dart';
 
 DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 class MyHomePage extends StatefulWidget {
@@ -30,12 +33,12 @@ class _MyHomePageState extends State<MyHomePage> {
           
       if(Platform.isAndroid){
         AndroidDeviceInfo androidDeviceInfo = await deviceInfoPlugin.androidInfo;
-        log("Details of an android: ${androidDeviceInfo.version.release}\n ${androidDeviceInfo.version.sdkInt} ");
+        log("Details of an android: ${androidDeviceInfo.version.release} ${androidDeviceInfo.version.sdkInt} ");
         String details =androidDeviceInfo.version.sdkInt.toString();
         return details;
       }else{
         IosDeviceInfo iosDeviceInfo = await deviceInfoPlugin.iosInfo;
-        log("Details of an android: ${iosDeviceInfo.systemVersion}\n ${iosDeviceInfo.systemVersion} ");
+        log("Details of an ios: ${iosDeviceInfo.systemVersion} ${iosDeviceInfo.systemVersion} ");
         String details =iosDeviceInfo.systemVersion.toString();
         return details;
       }
@@ -47,10 +50,29 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // deviceInfo();
+    deviceInfo();
+ 
 
    
   }
+
+   Future< void> showNotification()async{
+
+    AndroidNotificationDetails androidDetails = const AndroidNotificationDetails(
+        "newchannel", 
+        "checknotification",
+        // icon: 
+
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+        enableVibration: true,
+        );
+
+    DarwinNotificationDetails iOSNotificationDetails = const DarwinNotificationDetails(presentAlert: true,presentBadge: true,presentSound: true);
+     NotificationDetails notiDetails = NotificationDetails(android: androidDetails,iOS: iOSNotificationDetails);
+   await  notificationsPlugin.show(1, "New test title", "Total body", notiDetails,payload: "Details");
+    }
 
 
 
@@ -60,6 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Check Notification'),
+      ),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        showNotification();
+      },
+      child: Icon(Icons.add),
       ),
       body: Center(
         child: Column(
