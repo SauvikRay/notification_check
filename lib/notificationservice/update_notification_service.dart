@@ -41,7 +41,7 @@ static void  requestNotiPermission()async{
         }else if(Platform.isAndroid){
           final AndroidFlutterLocalNotificationsPlugin? androidImplementation = notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
         final bool? granted = await androidImplementation?.requestPermission();
-        log("Notification is : $granted");
+        log("Notification is granted: $granted");
         }
         
 }

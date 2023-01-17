@@ -1,6 +1,7 @@
 import UIKit
 import Flutter
 import flutter_local_notifications
+import FirebaseCore
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,6 +11,7 @@ import flutter_local_notifications
   ) -> Bool {
       
       GeneratedPluginRegistrant.register(with: self)
+      FirebaseApp.configure();
       
       if #available(iOS 10.0, *) {
         // For iOS 10 display notification (sent via APNS)
