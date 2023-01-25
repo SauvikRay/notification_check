@@ -43,19 +43,17 @@
 
 
 import 'dart:developer';
-import 'dart:io';
 
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 import 'myhomepage.dart';
-import 'notificationservice/notification-service.dart';
 import 'notificationservice/update_notification_service.dart';
-
-
 
 
 //initialize FireBase Background Service
@@ -63,7 +61,9 @@ import 'notificationservice/update_notification_service.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+  
+  );
 
   log("Handling a background message: ${message.messageId}");
 }
@@ -72,9 +72,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 
 void main() async {
+  // debugDefaultTargetPlatformOverride =TargetPlatform.android;
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 NewNotificationService.requestNotiPermission();
+NewNotificationService.initializeNotification();
 
 
 
@@ -88,13 +91,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return OverlaySupport.global(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHomePage(),
       ),
-      home: const MyHomePage(),
     );
   }
 }

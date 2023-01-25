@@ -2,6 +2,10 @@
   import 'dart:developer';
 import 'dart:io';
 
+import 'package:check_notification/myhomepage.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 //From Flutter Local Notification
@@ -20,12 +24,10 @@ void notificationTapBackground(NotificationResponse notificationResponse) {
 
   int id = 0;
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
     FlutterLocalNotificationsPlugin notificationsPlugin =FlutterLocalNotificationsPlugin();
 class NewNotificationService{
 NewNotificationService._();
-AndroidInitializationSettings androidInitializationSettings =  const AndroidInitializationSettings("@mipmap/ic_launcher");
+AndroidInitializationSettings androidInitializationSettings =  const AndroidInitializationSettings('@mipmap/ic_launcher');
 DarwinInitializationSettings? iosSettings = const DarwinInitializationSettings(
 requestAlertPermission : true,
 requestSoundPermission :true,
@@ -46,21 +48,67 @@ static void  requestNotiPermission()async{
         
 }
 
-static void initializeNotific()async{
-const InitializationSettings initializationSettings = InitializationSettings(android: AndroidInitializationSettings("@mipmap/ic_launcher"),iOS: DarwinInitializationSettings(
+static void initializeNotification()async{
+const InitializationSettings initializationSettings = InitializationSettings(
+  android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+iOS: DarwinInitializationSettings(
 requestAlertPermission : true,
 requestSoundPermission :true,
 requestBadgePermission : true,
  defaultPresentBadge : true,
+ defaultPresentSound:true,
  requestCriticalPermission:true,
 ),);
 bool? initialized = await notificationsPlugin.initialize(
-    initializationSettings
+    initializationSettings,
+    onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+    onDidReceiveNotificationResponse: (notificationResponse) async{
+        final String? payload = notificationResponse.payload;
+        if(notificationResponse.payload !=null){
+          debugPrint("Notification Payload: $payload");
+        }
+       //Here go to new route with notification.
+    },
   );
 
   log("Notifications : $initialized");
 }
 
+static void createAndDisplaynotification(RemoteMessage message) async {
+
+    try {
+      final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'checknotification',
+          'pushnotificationappchannel',
+          icon:'@mipmap/ic_launcher',
+          importance: Importance.high,
+          priority: Priority.high,
+          playSound: true,
+          
+
+        ),
+
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound:true,
+          
+        ),
+      );
+
+      await notificationsPlugin.show(
+        id,
+        message.notification!.title,
+        message.notification!.body,
+        notificationDetails,
+        payload: message.data['id'],
+      );
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
 
 
 

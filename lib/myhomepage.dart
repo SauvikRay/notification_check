@@ -1,15 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:check_notification/demo_screen.dart';
+import 'package:check_notification/model/push_notification.dart';
+import 'package:check_notification/notifiaction_badge.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:overlay_support/overlay_support.dart';
 
-import 'main.dart';
-import 'notificationservice/notification-service.dart';
 import 'notificationservice/update_notification_service.dart';
+
+FirebaseMessaging       messaging= FirebaseMessaging.instance;
+
 
 DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 class MyHomePage extends StatefulWidget {
@@ -23,10 +27,102 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  int _counter=0;
   String deviceTokenToSendPushNotification = '';
+ 
+  PushNotification? _notificationdetails;
+ 
+    void requestAndRegisterNotification()async{
+      //instance Firebase Messaging;
 
 
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        provisional: false,
+        sound: true,
+      );
+      if(settings.authorizationStatus == AuthorizationStatus.authorized){
+        log("Notification Permission is Accessed");
+   
+
+
+        String? token = await messaging.getToken();
+        log("The token is :" + token!);
+
+        // FirebaseMessaging.onMessage.listen(( message) {
+        //   PushNotification notification =PushNotification(message.notification?.title, message.notification?.body);
+
+        //   setState(() {
+        //     _notificationdetails = notification;
+        //     _counter++;
+        //   });
+        //       if(_notificationdetails != null){
+        //         //Displaying Noti
+        //         // showSimpleNotification(
+        //         //   Text(_notificationdetails!.title!),
+        //         //   leading: NotificationBadge(totalNoti: _counter),
+        //         //   subtitle: Text(_notificationdetails!.body!),
+        //         //   background: Colors.cyan.shade700,
+        //         //   duration:const Duration(seconds: 2),
+        //         // );
+               
+        //       }
+
+        //  });
+
+    // 1. This method call when app in terminated state and you get a notification
+    // when you click on notification app open from terminated state and you can get notification data in this method
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) {
+        log("FirebaseMessaging.instance.getInitialMessage");
+        if (message != null) {
+          log("New Notification");
+          if (message.data['id'] != null) {
+
+            log("Firebase Message : Go to new page");
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (context) => DemoScreen(
+            //       id: message.data['id'],
+            //     ),
+            //   ),
+            // );
+          }
+        }
+      },
+    );
+
+    // 2. This method only call when App in forground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+      (RemoteMessage message) {
+        log("FirebaseMessaging.onMessage.listen");
+        if (message.notification != null) {
+          log(message.notification!.title.toString());
+          log(message.notification!.body.toString());
+          log("message.data11 ${message.data}");
+          NewNotificationService.createAndDisplaynotification(message);
+        }
+      },
+    );
+
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) {
+        log("FirebaseMessaging.onMessageOpenedApp.listen");
+        if (message.notification != null) {
+          log(message.notification!.title.toString());
+          log(message.notification!.body.toString());
+          log("message.data22 ${message.data['id']}");
+        }
+      },
+    );
+  }
+    
+
+
+    }
    //Device Info plugin 
    deviceInfo()async{
     try{
@@ -51,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     deviceInfo();
+    requestAndRegisterNotification();
  
 
    
@@ -59,9 +156,9 @@ class _MyHomePageState extends State<MyHomePage> {
    Future< void> showNotification()async{
 
     AndroidNotificationDetails androidDetails = const AndroidNotificationDetails(
-        "newchannel", 
         "checknotification",
-        // icon: 
+        "newchannel", 
+        icon:"@mipmap/ic_launcher",
 
         importance: Importance.max,
         priority: Priority.max,
@@ -86,21 +183,26 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(onPressed: () {
         showNotification();
       },
-      child: Icon(Icons.add),
+      child: const Icon(Icons.add),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'You have pushed the button this many times:',
+          ),
+          SizedBox(height: 5,),
+          NotificationBadge(totalNoti: _counter),
+          SizedBox(height: 5,),
+          _notificationdetails !=null? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Title : ${_notificationdetails!.title!}'),
+                   const SizedBox(height: 5,),
+                     Text("Body :${_notificationdetails!.body!} "),
+            ],
+          ): Container()
+        ],
       ),
     );
   }

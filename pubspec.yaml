@@ -45,6 +45,7 @@ dependencies:
   image: ^4.0.10
   path_provider: ^2.0.11
   timezone: ^0.9.1
+  overlay_support: ^2.1.0
 
 dev_dependencies:
   flutter_test:
