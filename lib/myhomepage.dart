@@ -10,9 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:overlay_support/overlay_support.dart';
 
+import 'networks/send_fcm_token.dart';
 import 'notificationservice/update_notification_service.dart';
 
-FirebaseMessaging       messaging= FirebaseMessaging.instance;
+FirebaseMessaging  messaging= FirebaseMessaging.instance;
+
 
 
 DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -49,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         String? token = await messaging.getToken();
         log("The token is :" + token!);
+          postFcmToken(token);
 
         // FirebaseMessaging.onMessage.listen(( message) {
         //   PushNotification notification =PushNotification(message.notification?.title, message.notification?.body);
@@ -147,6 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     deviceInfo();
+
     requestAndRegisterNotification();
  
 
